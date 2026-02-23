@@ -2,3 +2,8 @@
 
 alembic/versions/*.pyc
 
+/.env
+/test.env
+
+/.coverage
+/htmlcov/

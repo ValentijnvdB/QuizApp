@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, desc, select
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, UTC
 import random
 import string
 
@@ -157,7 +157,7 @@ def delete_question(db: Session, question_id: int) -> bool:
 # ==================== SESSION CRUD ====================
 
 def generate_session_code() -> str:
-    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
 
 
 def create_session(db: Session, quiz_id: int, host_id: int) -> SessionModel:
@@ -194,7 +194,7 @@ def start_session(db: Session, session_id: int) -> Optional[SessionModel]:
         return None
 
     session.status = SessionStatus.ACTIVE
-    session.started_at = datetime.now()
+    session.started_at = datetime.now(UTC)
     db.commit()
     db.refresh(session)
     return session
@@ -207,7 +207,7 @@ def end_session(db: Session, session_id: int) -> Optional[SessionModel]:
         return None
 
     session.status = SessionStatus.ENDED
-    session.ended_at = datetime.utcnow()
+    session.ended_at = datetime.now(UTC)
     db.commit()
     db.refresh(session)
     return session
