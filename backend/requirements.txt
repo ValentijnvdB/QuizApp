@@ -1,0 +1,36 @@
+# FastAPI and ASGI server
+fastapi
+uvicorn[standard]
+python-multipart
+
+# Database
+sqlalchemy
+alembic
+psycopg2-binary
+
+# Authentication
+fastapi-users[sqlalchemy]
+python-jose[cryptography]
+passlib[bcrypt]
+
+# WebSockets
+websockets
+
+# Environment variables
+python-dotenv
+
+# CORS
+fastapi-cors
+
+# Validation
+pydantic
+pydantic-settings
+
+# File handling
+aiofiles
+python-magic
+
+# Testing
+pytest
+pytest-asyncio
+httpx
