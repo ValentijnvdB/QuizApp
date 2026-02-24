@@ -4,11 +4,15 @@ import axios from 'axios'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
+// TODO: request refresh if access access token expires
+// TODO: logout if refresh token expires
+
 export const useAuthStore = defineStore('auth', () => {
-  const token = ref(localStorage.getItem('authToken') || null)
+  const accessToken = ref(localStorage.getItem('accessToken') || null)
+  const refreshToken = ref(localStorage.getItem('refreshToken') || null)
   const user = ref(JSON.parse(localStorage.getItem('user') || 'null'))
 
-  const isAuthenticated = computed(() => !!token.value)
+  const isAuthenticated = computed(() => !!accessToken.value)
 
   async function login(username, password) {
     try {
@@ -16,15 +20,18 @@ export const useAuthStore = defineStore('auth', () => {
         username,
         password
       })
-      
-      token.value = response.data.access_token
+      console.log(response.data)
+
+      accessToken.value = response.data.access_token
+      refreshToken.value = response.data.refresh_token
       user.value = response.data.user
-      
-      localStorage.setItem('authToken', token.value)
-      localStorage.setItem('user', JSON.stringify(user.value))
+
+      localStorage.setItem('accessToken', accessToken.value)
+      localStorage.setItem('refreshToken', refreshToken.value)
+      localStorage.setItem('user', JSON.stringify(user))
       
       // Set default Authorization header
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
+      axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken.value}`
       
       return true
     } catch (error) {
@@ -49,21 +56,31 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  function logout() {
-    token.value = null
+  async function logout(refresh_token) {
+    try {
+      const response = await axios.post(`${API_URL}/auth/logout`, {refresh_token})
+    } catch (error) {
+      console.error('Logout failed:', error)
+      throw error
+    }
+
+    accessToken.value = null
+    refreshToken.value = null
     user.value = null
-    localStorage.removeItem('authToken')
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
     localStorage.removeItem('user')
     delete axios.defaults.headers.common['Authorization']
   }
 
   // Initialize axios header if token exists
-  if (token.value) {
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
+  if (accessToken.value) {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken.value}`
   }
 
   return {
-    token,
+    accessToken: accessToken,
+    refreshToken: refreshToken,
     user,
     isAuthenticated,
     login,

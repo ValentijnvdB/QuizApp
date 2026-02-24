@@ -48,6 +48,17 @@ class User(Base):
     sessions = relationship("Session", back_populates="host", cascade="all, delete-orphan")
 
 
+class RefreshToken(Base):
+    __tablename__ = "refresh_tokens"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    token = Column(String, nullable=False, unique=True)
+    expires_at = Column(DateTime(timezone=True))
+    revoked = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
 class Quiz(Base):
     """Quiz model - Collection of questions"""
     __tablename__ = "quizzes"

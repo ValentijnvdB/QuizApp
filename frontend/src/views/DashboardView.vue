@@ -41,7 +41,7 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 const handleLogout = () => {
-  authStore.logout()
+  authStore.logout(authStore.refreshToken)
   router.push('/')
 }
 </script>

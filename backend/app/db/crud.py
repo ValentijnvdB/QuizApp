@@ -6,8 +6,8 @@ import random
 import string
 
 from app.db.models import (
-    User, Quiz, Question, Session as SessionModel, 
-    Participant, Answer, SessionStatus, QuestionType
+    User, Quiz, Question, Session as SessionModel,
+    Participant, Answer, SessionStatus, QuestionType, RefreshToken
 )
 
 
@@ -18,6 +18,7 @@ def create_user(db: Session, username: str, email: str, hashed_password: str) ->
     db.add(user)
     db.commit()
     db.refresh(user)
+    print(f"Created user with id {user.id}")
     return user
 
 
@@ -34,6 +35,29 @@ def get_user_by_username(db: Session, username: str) -> Optional[User]:
 def get_user_by_email(db: Session, email: str) -> Optional[User]:
     stmt = select(User).where(User.email == email)
     return db.scalars(stmt).first()
+
+# ==================== TOKEN CRUD ====================
+
+def add_refresh_token(db: Session, user_id: int, token: str, expires_at: datetime) -> Optional[RefreshToken]:
+    token = RefreshToken(user_id=user_id, token=token, expires_at=expires_at)
+    db.add(token)
+    db.commit()
+    db.refresh(token)
+    return token
+
+def get_refresh_token_by_token(db: Session, token: str) -> Optional[RefreshToken]:
+    stmt = select(RefreshToken).where(RefreshToken.token == token)
+    return db.scalars(stmt).first()
+
+def revoke_refresh_token(db: Session, token: str) -> Optional[RefreshToken]:
+    rt = get_refresh_token_by_token(db, token)
+    if not rt:
+        return None
+
+    rt.revoked = True
+    db.commit()
+    db.refresh(rt)
+    return rt
 
 
 # ==================== QUIZ CRUD ====================
@@ -57,8 +81,7 @@ def get_quizzes_by_user(db: Session, user_id: int) -> list[Quiz]:
 
 
 def update_quiz(db: Session, quiz_id: int, title: str = None, description: str = None, is_published: bool = None) -> Optional[Quiz]:
-    stmt = select(Quiz).where(Quiz.id == quiz_id)
-    quiz = db.scalars(stmt).first()
+    quiz = get_quiz_by_id(db, quiz_id)
     if not quiz:
         return None
 
@@ -129,8 +152,7 @@ def get_questions_by_quiz(db: Session, quiz_id: int) -> list[Question]:
 
 
 def update_question(db: Session, question_id: int, **kwargs) -> Optional[Question]:
-    stmt = select(Question).where(Question.id == question_id)
-    question = db.scalars(stmt).first()
+    question = get_question_by_id(db, question_id)
     if not question:
         return None
 
@@ -214,8 +236,7 @@ def end_session(db: Session, session_id: int) -> Optional[SessionModel]:
 
 
 def update_session_question(db: Session, session_id: int, question_index: int) -> Optional[SessionModel]:
-    stmt = select(SessionModel).where(SessionModel.id == session_id)
-    session = db.scalars(stmt).first()
+    session = get_session_by_id(db, session_id)
     if not session:
         return None
 
@@ -246,8 +267,7 @@ def get_participants_by_session(db: Session, session_id: int) -> list[Participan
 
 
 def update_participant_score(db: Session, participant_id: int, points_to_add: int) -> Optional[Participant]:
-    stmt = select(Participant).where(Participant.id == participant_id)
-    participant = db.scalars(stmt).first()
+    participant = get_participant_by_id(db, participant_id)
     if not participant:
         return None
 

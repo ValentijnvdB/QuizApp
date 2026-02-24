@@ -17,7 +17,7 @@
         </router-link>
         
         <router-link
-          to="/login"
+          to="/dashboard"
           class="block w-full bg-primary-800 hover:bg-primary-900 text-white font-bold py-4 px-8 rounded-lg text-lg transition-colors"
         >
           Create Quiz

@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, Session
 from sqlalchemy.orm import sessionmaker
-from typing import Generator
+from typing import Generator, Any
 import os
 
 # Get database URL from environment variable
@@ -23,7 +23,7 @@ Base = declarative_base()
 
 
 # Dependency for FastAPI routes to get database session
-def get_db() -> Generator:
+def get_db() -> Generator[Session, Any, None]:
     """
     Dependency function that yields a database session.
     Usage in FastAPI routes:

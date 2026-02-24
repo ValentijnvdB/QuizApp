@@ -58,7 +58,7 @@ const router = createRouter({
 
 // Navigation guard for authentication
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = localStorage.getItem('authToken')
+  const isAuthenticated = localStorage.getItem('accessToken')
   
   if (to.meta.requiresAuth && !isAuthenticated) {
     next({ name: 'login', query: { redirect: to.fullPath } })
