@@ -41,8 +41,8 @@ def login_user(lf: LoginForm, response: Response, db_session: Session = Depends(
         raise HTTPException(status_code=400, detail="Incorrect username or password")
 
     data = {"sub": str(user.id)}
-    at = utils.create_access_token(db_session, data)
-    rt = utils.create_refresh_token(data)
+    at = utils.create_access_token(data)
+    rt = utils.create_refresh_token(db_session, data)
 
     response.set_cookie(key="refresh_token", value=rt, httponly=True, path="/auth/refresh")
 
