@@ -1,6 +1,9 @@
 import axios from 'axios'
+import {useAuthStore} from '../stores/auth'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
+const authStore = useAuthStore()
 
 const api = axios.create({
   baseURL: API_URL,
@@ -8,6 +11,7 @@ const api = axios.create({
     'Content-Type': 'application/json'
   }
 })
+axios.defaults.withCredentials = true;
 
 // Request interceptor to add auth token
 api.interceptors.request.use(
@@ -28,10 +32,18 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem('authToken')
-      localStorage.removeItem('user')
-      window.location.href = '/login'
+      if (error.response.config.url === '/auth/refresh' ||
+          error.config.url === '/auth/refresh') {
+        // Refresh token has expired or is invalid
+        // Log the user out
+        authStore.logout()
+        window.location.href = '/login'
+      } else {
+        // Access token has expired or is invalid
+        // Request a new token
+        localStorage.removeItem('accessToken')
+        authStore.refreshAccessToken()
+      }
     }
     return Promise.reject(error)
   }

@@ -2,7 +2,7 @@ import os
 
 import bcrypt
 import jwt
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Response
 from sqlalchemy.orm import Session
 
 from .schemas import *
@@ -35,7 +35,7 @@ def register_user(rf: RegisterForm, db_session: Session = Depends(db.get_db)):
 
 
 @router.post("/login")
-def login_user(lf: LoginForm, db_session: Session = Depends(db.get_db)):
+def login_user(lf: LoginForm, response: Response, db_session: Session = Depends(db.get_db)):
     user = db.get_user_by_username(db=db_session, username=lf.username)
     if not user or not utils.check_password(hashed_password=user.hashed_password, password=lf.password):
         raise HTTPException(status_code=400, detail="Incorrect username or password")
@@ -44,9 +44,10 @@ def login_user(lf: LoginForm, db_session: Session = Depends(db.get_db)):
     at = utils.create_access_token(db_session, data)
     rt = utils.create_refresh_token(data)
 
+    response.set_cookie(key="refresh_token", value=rt, httponly=True, path="/auth/refresh")
+
     return {
         "access_token": at,
-        "refresh_token": rt,
         "user": {
             "id": user.id,
             "username": user.username
@@ -67,7 +68,7 @@ def refresh_token(rt: str, db_session: Session = Depends(db.get_db)):
         raise HTTPException(status_code=401, detail="Refresh token is expired or invalid")
 
     access_token = utils.create_access_token({"sub": str(user_id)})
-    return {"access_token": access_token, "refresh_token": rt}
+    return {"access_token": access_token}
 
 @router.post("/logout")
 def logout_user(logout: LogoutSchema, db_session: Session = Depends(db.get_db)):

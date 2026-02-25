@@ -4,34 +4,36 @@ import axios from 'axios'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
-// TODO: request refresh if access access token expires
-// TODO: logout if refresh token expires
 
 export const useAuthStore = defineStore('auth', () => {
   const accessToken = ref(localStorage.getItem('accessToken') || null)
-  const refreshToken = ref(localStorage.getItem('refreshToken') || null)
   const user = ref(JSON.parse(localStorage.getItem('user') || 'null'))
 
   const isAuthenticated = computed(() => !!accessToken.value)
 
+  function setAccessToken(token) {
+    accessToken.value = token
+    localStorage.setItem('accessToken', accessToken.value)
+    // Set default Authorization header
+    axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken.value}`
+  }
+
   async function login(username, password) {
+    let cred = {
+      username,
+      password
+    };
     try {
-      const response = await axios.post(`${API_URL}/auth/login`, {
-        username,
-        password
+      const response = await axios.post(`${API_URL}/auth/login`, cred, {
+        withCredentials: true
       })
       console.log(response.data)
 
-      accessToken.value = response.data.access_token
-      refreshToken.value = response.data.refresh_token
-      user.value = response.data.user
+      setAccessToken(response.data.access_token)
 
-      localStorage.setItem('accessToken', accessToken.value)
-      localStorage.setItem('refreshToken', refreshToken.value)
+      user.value = response.data.user
       localStorage.setItem('user', JSON.stringify(user))
-      
-      // Set default Authorization header
-      axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken.value}`
+
       
       return true
     } catch (error) {
@@ -56,21 +58,34 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function logout(refresh_token) {
+  async function logout() {
+    console.log("Logging out")
     try {
-      const response = await axios.post(`${API_URL}/auth/logout`, {refresh_token})
+      const response = await axios.post(`${API_URL}/auth/logout`, {})
     } catch (error) {
       console.error('Logout failed:', error)
       throw error
     }
 
     accessToken.value = null
-    refreshToken.value = null
     user.value = null
     localStorage.removeItem('accessToken')
-    localStorage.removeItem('refreshToken')
     localStorage.removeItem('user')
     delete axios.defaults.headers.common['Authorization']
+  }
+
+  async function refreshAccessToken() {
+    console.log("Refreshing access token")
+    try {
+      const response = await axios.post(`${API_URL}/auth/refresh`, {}, {
+        withCredentials: true
+      })
+      setAccessToken(response.data.access_token)
+
+    } catch (error) {
+      console.error('Refresh access token failed:', error)
+      throw error
+    }
   }
 
   // Initialize axios header if token exists
@@ -80,11 +95,11 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     accessToken: accessToken,
-    refreshToken: refreshToken,
     user,
     isAuthenticated,
     login,
     register,
-    logout
+    logout,
+    refreshAccessToken
   }
 })
