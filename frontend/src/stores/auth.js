@@ -19,6 +19,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function login(username, password) {
+    console.log("Logging in...")
     let cred = {
       username,
       password
@@ -43,6 +44,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function register(username, email, password) {
+    console.log("Registering...")
     try {
       const response = await axios.post(`${API_URL}/auth/register`, {
         username,
@@ -86,6 +88,7 @@ export const useAuthStore = defineStore('auth', () => {
       console.error('Refresh access token failed:', error)
       throw error
     }
+    return accessToken.value
   }
 
   // Initialize axios header if token exists

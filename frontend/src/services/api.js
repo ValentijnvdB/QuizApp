@@ -13,36 +13,31 @@ const api = axios.create({
 })
 axios.defaults.withCredentials = true;
 
-// Request interceptor to add auth token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('authToken')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
-  },
-  (error) => {
-    return Promise.reject(error)
-  }
-)
 
 // Response interceptor for error handling
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      if (error.response.config.url === '/auth/refresh' ||
-          error.config.url === '/auth/refresh') {
+      if (error.response.config.url === `${API_URL}/auth/refresh` ||
+          error.config.url === `${API_URL}/auth/refresh`) {
+        console.log("refresh failed... logging out!")
         // Refresh token has expired or is invalid
         // Log the user out
-        authStore.logout()
-        window.location.href = '/login'
+        authStore.logout().then(() => {
+          window.location.href = '/'
+        })
+        return
       } else {
         // Access token has expired or is invalid
         // Request a new token
         localStorage.removeItem('accessToken')
-        authStore.refreshAccessToken()
+        return authStore.refreshAccessToken().then((newToken) => {
+          // Retry the original request with the new token
+          const originalRequest = error.config
+          originalRequest.headers['Authorization'] = `Bearer ${newToken}`
+          return api(originalRequest)
+        })
       }
     }
     return Promise.reject(error)
@@ -53,7 +48,7 @@ api.interceptors.response.use(
 export const quizApi = {
   // Get all quizzes for current user
   getQuizzes() {
-    return api.get('/quizzes')
+    return api.get('/quizzes/from-user')
   },
   
   // Get a specific quiz
