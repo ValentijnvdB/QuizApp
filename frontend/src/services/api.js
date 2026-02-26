@@ -52,18 +52,22 @@ export const quizApi = {
   },
   
   // Get a specific quiz
-  getQuiz(id) {
-    return api.get(`/quizzes/${id}`)
+  getQuiz(quiz_id) {
+    return api.get(`/quizzes/${quiz_id}`)
   },
   
   // Create a new quiz
-  createQuiz(quizData) {
-    return api.post('/quizzes', quizData)
+  createQuiz(title, description, creator_id) {
+    return api.post('/quizzes/create', {
+      title,
+      description,
+      creator_id
+    })
   },
   
   // Update a quiz
-  updateQuiz(id, quizData) {
-    return api.put(`/quizzes/${id}`, quizData)
+  updateQuiz(quiz_id) {
+    return api.put(`/quizzes/${quiz_id}`, {quiz_id})
   },
   
   // Delete a quiz

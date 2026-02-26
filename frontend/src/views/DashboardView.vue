@@ -25,9 +25,17 @@
       
       <div class="card">
         <h2 class="text-2xl font-bold mb-4">Your Quizzes</h2>
-        <p class="text-gray-600">
-          Quiz list will be displayed here. Connect to your backend to see your quizzes.
+        <p class="text-gray-600" v-if="quizzes===null">
+          Loading quizzes...
         </p>
+        <p class="text-gray-600" v-else-if="quizzes.length===0">
+          You have not created any quizzes yet. Create your first one with the button above!
+        </p>
+        <ol v-else>
+          <li v-for="quiz in quizzes" :key="quiz.id">
+            {{ quiz.title }}
+          </li>
+        </ol>
       </div>
     </main>
   </div>
@@ -36,12 +44,21 @@
 <script setup>
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import {quizApi} from '@/services/api'
+import {ref} from "vue";
 
 const router = useRouter()
 const authStore = useAuthStore()
 
+let quizzes = ref(null)
+
 const handleLogout = () => {
-  authStore.logout(authStore.refreshToken)
+  authStore.logout()
   router.push('/')
 }
+
+const requestQuizzes = () => {
+  quizApi.getQuizzes().then((response) => {quizzes.value = response.data})
+}
+requestQuizzes()
 </script>
