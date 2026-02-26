@@ -4,7 +4,9 @@ from sqlalchemy.sql import func
 from app.db.database import Base
 import enum
 
-# TODO: Add composite indices if needed using '__table_args__ = ()'
+# TODO:
+#  - Add composite indices if needed using '__table_args__ = ()'
+#  - Make some of the ids random?
 
 class QuestionType(str, enum.Enum):
     """Enum for question types"""

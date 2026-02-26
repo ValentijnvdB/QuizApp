@@ -66,8 +66,12 @@ export const quizApi = {
   },
   
   // Update a quiz
-  updateQuiz(quiz_id) {
-    return api.put(`/quizzes/${quiz_id}`, {quiz_id})
+  updateQuiz(quiz_id, title, description, is_published) {
+    return api.put(`/quizzes/${quiz_id}`, {
+      title,
+      description,
+      is_published
+    })
   },
   
   // Delete a quiz

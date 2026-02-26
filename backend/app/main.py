@@ -8,6 +8,7 @@ import os
 
 
 from app import auth
+from app import quiz
 
 
 
@@ -37,7 +38,7 @@ app.mount("/media", StaticFiles(directory="media"), name="media")
 
 # Include routers
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
-# app.include_router(quizzes.router, prefix="/quizzes", tags=["Quizzes"])
+app.include_router(quiz.router, prefix="/quizzes", tags=["Quizzes"])
 # app.include_router(sessions.router, prefix="/sessions", tags=["Sessions"])
 # app.include_router(websocket.router, prefix="/ws", tags=["WebSocket"])
 

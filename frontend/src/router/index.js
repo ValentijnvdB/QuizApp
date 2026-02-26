@@ -27,9 +27,9 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
-      path: '/quiz/:id/edit',
-      name: 'quiz-edit',
-      component: () => import('../views/QuizEditView.vue'),
+      path: '/quiz/:id',
+      name: 'quiz-overview',
+      component: () => import('../views/QuizOverviewView.vue'),
       meta: { requiresAuth: true }
     },
     {

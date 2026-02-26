@@ -33,7 +33,7 @@
         </p>
         <ol v-else>
           <li v-for="quiz in quizzes" :key="quiz.id">
-            {{ quiz.title }}
+            {{quiz.id}} - {{ quiz.title }} - {{ quiz.description }} - {{quiz.created_at}}
           </li>
         </ol>
       </div>

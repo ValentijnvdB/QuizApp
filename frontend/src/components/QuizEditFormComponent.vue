@@ -56,8 +56,6 @@ const handleSubmit = async () => {
   loading.value = true
   error.value = ''
 
-  console.log("Handling submit")
-
   try {
     props.handleSubmit(form)
   } catch (err) {
