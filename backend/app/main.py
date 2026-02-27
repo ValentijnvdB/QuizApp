@@ -1,20 +1,17 @@
-from dotenv import load_dotenv
-load_dotenv()
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import os
 
-
 from app import auth
 from app import quiz
+from app import db
 
 
+# setup database
+db.init()
 
-# Import your routers here
-# from app.routers import auth, quizzes, sessions, websocket
-
+# create app
 app = FastAPI(
     title="Quiz App API",
     description="Real-time quiz application API",

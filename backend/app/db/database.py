@@ -7,19 +7,23 @@ import os
 # Get database URL from environment variable
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Create SQLAlchemy engine
-engine = create_engine(
-    DATABASE_URL,
-    pool_pre_ping=True,  # Verify connections before using them
-    pool_size=10,
-    max_overflow=20
-)
-
-# Create SessionLocal class for database sessions
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+engine = None
+SessionLocal = None
 
 # Base class for all models
 Base = declarative_base()
+
+
+def init_db():
+    global engine, SessionLocal
+    engine = create_engine(
+        DATABASE_URL,
+        pool_pre_ping=True,  # Verify connections before using them
+        pool_size=10,
+        max_overflow=20
+    )
+    # Create SessionLocal class for database sessions
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 # Dependency for FastAPI routes to get database session

@@ -8,9 +8,6 @@ from sqlalchemy.orm import sessionmaker, Session
 
 from dotenv import load_dotenv
 
-# load environment
-load_dotenv('./test.env')
-
 # ---------------------------------------------------------------------------
 # Import application code – adjust the import paths as needed
 # ---------------------------------------------------------------------------
