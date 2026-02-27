@@ -18,7 +18,6 @@ def create_user(db: Session, username: str, email: str, hashed_password: str) ->
     db.add(user)
     db.commit()
     db.refresh(user)
-    print(f"Created user with id {user.id}")
     return user
 
 
