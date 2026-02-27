@@ -34,6 +34,8 @@ def register_user(rf: RegisterForm, db: Session = Depends(database.get_db)):
         hashed_password=hashed_password.decode("utf-8"),
     )
 
+    return {'message': 'User created successfully'}
+
 
 @router.post("/login")
 def login_user(lf: LoginForm, response: Response, db: Session = Depends(database.get_db)):
@@ -45,7 +47,7 @@ def login_user(lf: LoginForm, response: Response, db: Session = Depends(database
     at = utils.create_access_token(data)
     rt = utils.create_refresh_token(db, data)
 
-    response.set_cookie(key="refresh_token", value=rt, httponly=True, path="/auth/refresh")
+    response.set_cookie(key="refresh_token", value=rt, httponly=True, path="/auth")
 
     return {
         "access_token": at,
@@ -59,7 +61,8 @@ def login_user(lf: LoginForm, response: Response, db: Session = Depends(database
 @router.post("/refresh", response_model=Token)
 def refresh_access_token(
     db: Session = Depends(database.get_db),
-    refresh_token: str | None = Cookie(default=None)):
+    refresh_token: str | None = Cookie(default=None)
+):
     if not refresh_token:
         raise HTTPException(status_code=401, detail="No refresh token found")
 
@@ -85,6 +88,13 @@ def refresh_access_token(
     }
 
 @router.post("/logout")
-def logout_user(logout: LogoutSchema, db: Session = Depends(database.get_db)):
-    database.revoke_refresh_token(db, token=logout.refresh_token)
+def logout_user(
+    response: Response,
+    db: Session = Depends(database.get_db),
+    refresh_token: str | None = Cookie(default=None),
+):
+    if not refresh_token:
+        raise HTTPException(status_code=401, detail="No refresh token found")
+    database.revoke_refresh_token(db, token=refresh_token)
+    response.delete_cookie(key="refresh_token", path="/auth")
     return {"message": "You have been logged out"}

@@ -17,8 +17,8 @@ REFRESH_TOKEN_EXPIRE_DAYS = 7
 def hash_password(password: str) -> str:
     """Hash password using bcrypt algorithm"""
     as_bytes = password.encode('utf-8')
-    bcrypt.hashpw(as_bytes, bcrypt.gensalt())
-    return as_bytes.decode('utf-8')
+    hashed = bcrypt.hashpw(as_bytes, bcrypt.gensalt())
+    return hashed.decode('utf-8')
 
 
 def check_password(hashed_password: str, password: str) -> bool:
